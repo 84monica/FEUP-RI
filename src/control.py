@@ -1,13 +1,8 @@
-import time
-import sys
 import argparse
 from PIL import Image
-import math
-import numpy as np
 import gym
 from gym_duckietown.envs import DuckietownEnv
 import os
-import cv2
 from roboflow import Roboflow
 
 
