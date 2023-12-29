@@ -3,6 +3,7 @@
 import time
 import sys
 import argparse
+from PIL import Image
 import math
 import numpy as np
 import gym
@@ -32,6 +33,8 @@ env.render()
 
 total_reward = 0
 
+counter = 1950
+
 while True:
 
     lane_pose = env.get_lane_pos2(env.cur_pos, env.cur_angle)
@@ -53,6 +56,11 @@ while True:
     total_reward += reward
     
     print('Steps = %s, Timestep Reward=%.3f, Total Reward=%.3f' % (env.step_count, reward, total_reward))
+    
+    if counter % 10 == 0:
+        im = Image.fromarray(obs)
+        im.save('images/screen-'+str(counter//10)+'.png')
+    counter += 1
 
     env.render()
 
