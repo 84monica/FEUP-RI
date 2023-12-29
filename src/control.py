@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import time
 import sys
 import argparse
@@ -9,6 +7,9 @@ import numpy as np
 import gym
 from gym_duckietown.envs import DuckietownEnv
 import os
+import cv2
+from roboflow import Roboflow
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 map_file = os.path.join(current_dir, 'map.yaml')
@@ -18,6 +19,10 @@ parser.add_argument('--env-name', default=None)
 parser.add_argument('--map-name', default=map_file)
 parser.add_argument('--no-pause', action='store_true', help="don't pause on failure")
 args = parser.parse_args()
+
+rf = Roboflow(api_key="UUZRYYia676DD0a4CbI2")
+project = rf.workspace().project("ri-h9xbe")
+model = project.version(2).model
 
 if args.env_name is None:
     env = DuckietownEnv(
@@ -32,8 +37,6 @@ obs = env.reset()
 env.render()
 
 total_reward = 0
-
-counter = 1950
 
 while True:
 
@@ -54,14 +57,35 @@ while True:
     
     obs, reward, done, info = env.step([speed, steering])
     total_reward += reward
-    
-    print('Steps = %s, Timestep Reward=%.3f, Total Reward=%.3f' % (env.step_count, reward, total_reward))
-    
-    if counter % 10 == 0:
-        im = Image.fromarray(obs)
-        im.save('images/screen-'+str(counter//10)+'.png')
-    counter += 1
 
+    # print('Steps = %s, Timestep Reward=%.3f, Total Reward=%.3f' % (env.step_count, reward, total_reward))
+
+    # Check for any signs every 50 steps
+    
+    if env.step_count % 50 == 0:
+        print("Checking for signs...")
+
+        # Convert the observation into an image
+        im = Image.fromarray(obs)
+        im.save("image.jpg")
+        
+        # [{'x': 50.5, 'y': 130.0, 'width': 29.0, 'height': 46.0, 
+        # 'confidence': 0.5285166501998901, 'class': 't_intersect', 
+        # 'class_confidence': None, 'class_id': 1, 'tracker_id': None, 
+        # 'image_path': 'image.jpg', 'prediction_type': 'ObjectDetectionModel'}]
+
+        predictions = model.predict("image.jpg", confidence=40, overlap=30).json()["predictions"]
+        
+        if (predictions != []):
+            type_of_sign = predictions[0]["class"]
+            distance_to_intersection = predictions[0]["x"]
+            confidence = predictions[0]["confidence"]
+            
+            if (type_of_sign == "t_intersect"):
+                print("Intersection ahead! \n Distance: " + str(distance_to_intersection) + "\n Confidence: " + str(confidence))
+            elif (type_of_sign == "stop"):
+                print("Stop sign ahead! \n Distance: " + str(distance_to_intersection) + "\n Confidence: " + str(confidence))
+            
     env.render()
 
     if done:
