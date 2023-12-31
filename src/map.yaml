@@ -1,13 +1,94 @@
+# The following section defines the grid layout.
+#
+# Each row is an array of tiles descriptions.
+# The top-left tile in this file maps to coordinates (0, 0) in the world
+# Each tile contains a string with the kind of tile and its orientation.
+# The orientations are North, South, East, West. This is the direction in
+# which the agent is expected to drive when going onto this tile.
 tiles:
-- [floor  , floor       , floor     , floor     , floor         , floor     , floor         , floor  ]
-- [floor  , curve_left/W, straight/W, straight/W, straight/W    , straight/W, curve_left/N  , floor  ]
-- [floor  , straight/S  , floor     , floor     , floor         , floor     , straight/N    , floor  ]
-- [floor  , straight/S  , floor     , floor     , floor         , floor     , straight/N    , floor  ]
-- [floor  , straight/S  , floor     , floor     , curve_right/N , straight/E, curve_left/E  , floor  ]
-- [floor  , curve_left/S, straight/E, straight/E, curve_left/E  , floor     , floor         , floor  ]
-- [floor  , floor       , floor     , floor     , floor         , floor     , floor         , floor  ]
+- [floor    , floor         , floor     , floor         , floor     , floor         , floor         , floor]
+- [floor    , curve_left/W  , straight/W, 3way_left/W   , straight/W, straight/W    , curve_left/N  , asphalt]
+- [floor    , straight/S    , grass     , straight/N    , asphalt   , asphalt       , straight/N    , asphalt]
+- [floor    , 3way_left/S   , straight/W, 3way_left/N   , asphalt   , asphalt       , straight/N    , asphalt]
+- [floor    , straight/S    , grass     , straight/N    , asphalt   , curve_right/N , curve_left/E  , asphalt]
+- [floor    , curve_left/S  , straight/E, 3way_left/E   , straight/E, curve_left/E  , asphalt       , asphalt]
+- [floor    , floor         , floor     , floor         , floor     , floor         , floor         , floor]
 
+# The following is a listing of 3D objects placed on the map
+#
+# pos: object positions are scaled according to the tile size, so
+#      that (1.5, 2.5) would be exactly in the middle of tile (1, 2)
+# height: Objects can be scaled according to their real-world height in meters
+#         Duckietown tiles are 61cm, or 0.61 meter
+# rotate: the rotation angle determine the object's orientation
+#         a positive rotation angle corresponds to a counter-clockwise
+#         (leftward) rotation. The angles are in degrees.
+#         Models should, at angle 0, face towards the positive X axis.
 objects:
+
+- kind: tree
+  pos: [2.5, 4.5]
+  rotate: 180
+  height: 0.25
+  optional: true
+
+- kind: duckie
+  pos: [2.5, 2.9]
+  rotate: -90
+  height: 0.08
+  optional: true
+
+- kind: sign_stop
+  pos: [4.00, 0.97]
+  rotate: 0
+  height: 0.18
+- kind: sign_T_intersect
+  pos: [4.00, 1.97]
+  rotate: 90
+  height: 0.18
+- kind: sign_stop
+  pos: [3.00, 1.97]
+  rotate: 180
+  height: 0.18
+
+- kind: sign_stop
+  pos: [3.00, 3.11]
+  rotate: -90
+  height: 0.18
+- kind: sign_T_intersect
+  pos: [3.00, 4.11]
+  rotate: 180
+  height: 0.18
+- kind: sign_stop
+  pos: [4.00, 4.11]
+  rotate: 90
+  height: 0.18
+
+- kind: sign_T_intersect
+  pos: [3.00, 5.00]
+  rotate: -90
+  height: 0.18
+- kind: sign_stop
+  pos: [3.00, 6.11]
+  rotate: 180
+  height: 0.18
+- kind: sign_stop
+  pos: [4.00, 5.00]
+  rotate: 0
+  height: 0.18
+
+- kind: sign_stop
+  pos: [2.08, 4.05]
+  rotate: 90
+  height: 0.18
+- kind: sign_T_intersect
+  pos: [2.08, 2.96]
+  rotate: 0
+  height: 0.18
+- kind: sign_stop
+  pos: [0.94, 2.96]
+  rotate: -90
+  height: 0.18
 
 - kind: duckiebot
   pos: [4.5, 5.75]
@@ -20,5 +101,38 @@ objects:
   rotate: 0
   height: 0.12
   static: False
+
+- kind: house
+  pos: [4.8, 2.6]
+  rotate: 90
+  height: 0.5
+  optional: true
+
+- kind: truck
+  pos: [1.6, 6.3]
+  rotate: 0
+  height: 0.2
+  optional: true
+
+- kind: bus
+  pos: [2.0, 0.5]
+  rotate: 0
+  height: 0.18
+  optional: true
+- kind: bus
+  pos: [4, 0.5]
+  rotate: 0
+  height: 0.18
+  optional: true
+- kind: bus
+  pos: [6.0, 0.5]
+  rotate: 0
+  height: 0.18
+  optional: true
+- kind: truck
+  pos: [7.5, 0.5]
+  rotate: 180
+  height: 0.2
+  optional: true
 
 tile_size: 0.585
