@@ -92,7 +92,7 @@ objects:
 
 - kind: duckiebot
   pos: [4.5, 5.75]
-  rotate: -45
+  rotate: 180
   height: 0.12
   static: False
 

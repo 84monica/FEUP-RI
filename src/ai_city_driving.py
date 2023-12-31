@@ -70,8 +70,8 @@ while True:
     # print('Steps = %s, Timestep Reward=%.3f, ' % (env.step_count, reward))
 
     # Check for any signs
-    if env.step_count % 50 == 0:
-        print("Checking for signs...\n")
+    if env.step_count % 20 == 0:
+        # print("Checking for signs...\n")
 
         # Convert the observation into an image
         im = Image.fromarray(obs)

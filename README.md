@@ -3,16 +3,15 @@
 From *src* folder run:
 
 ```bash
-python3 control.py
+python3 ai_city_driving.py
 ```
 
 or 
 
 ```bash
-python3 control.py --map-name <map-name>
+python3 ai_city_driving.py --map-name <map-name>
 ```
 
 ## Map Names
 
-* udem1 - Has intersections and stop signs
-* custom worl (*map.yaml*) - Has two robots moving around
+* custom world (*map.yaml*) - Inspired on map udem1, has 4 intersections, stop signs and T intersection signs and has two robots moving around
