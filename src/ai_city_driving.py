@@ -71,7 +71,7 @@ while True:
 
     # Check for any signs
     if env.step_count % 20 == 0:
-        # print("Checking for signs...\n")
+        print("Checking for signs...\n")
 
         # Convert the observation into an image
         im = Image.fromarray(obs)
