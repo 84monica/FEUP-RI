@@ -12,13 +12,12 @@ map_file = os.path.join(current_dir, 'map.yaml')
 # Initiatize Model
 rf = Roboflow(api_key="UUZRYYia676DD0a4CbI2")
 project = rf.workspace().project("ri-h9xbe")
-model = project.version(2).model
+model = project.version(3).model
 
 # Initialize DuckieTown Simulation
 parser = argparse.ArgumentParser()
 parser.add_argument('--env-name', default=None)
 parser.add_argument('--map-name', default=map_file)
-parser.add_argument('--no-pause', action='store_true', help="don't pause on failure")
 args = parser.parse_args()
 
 if args.env_name is None:
@@ -35,10 +34,17 @@ env.render()
 
 stop_sign = False
 stop_steps = 0
+robot_detected = False
 
 while True:
-    if stop_sign:
-        # Is at stop sign so stop for 30 steps
+    if robot_detected:
+        # Stop until the robot is gone
+
+        speed = 0
+        steering = 0
+
+    elif stop_sign:
+        # Is at stop sign with no robots detected, stop for 30 steps
 
         speed = 0
         steering = 0
@@ -69,9 +75,9 @@ while True:
     obs, reward, done, info = env.step([speed, steering])
     # print('Steps = %s, Timestep Reward=%.3f, ' % (env.step_count, reward))
 
-    # Check for any signs
+    # Check for any objects
     if env.step_count % 20 == 0:
-        print("Checking for signs...\n")
+        print("Checking for objects...\n")
 
         # Convert the observation into an image
         im = Image.fromarray(obs)
@@ -80,32 +86,38 @@ while True:
         # Make a prediction based on the image
         predictions = model.predict("image.jpg", confidence=40, overlap=30).json()["predictions"]
         
-        if (predictions != []):
-            # Extract type of sign found in the image and confidence that it was found
-            type_of_sign = predictions[0]["class"]
-            confidence = predictions[0]["confidence"]
+        for prediction in predictions:
+
+            # Extract type of object found in the image and confidence that it was found
+            object_detected = prediction["class"]
+            confidence = prediction["confidence"]
             
-            # Extract coords and size of where the sign was found in the image
-            x, y, w, h = predictions[0]["x"], predictions[0]["y"], predictions[0]["width"], predictions[0]["height"]
+            # Extract coords and size of where the object was found in the image
+            x, y, w, h = prediction["x"], prediction["y"], prediction["width"], prediction["height"]
             
-            # Print the sign info
-            if (type_of_sign == "t_intersect"):
-                print("Intersection ahead! \n" + "X = " + str(x) + ", Y = " + str(y) + ", W = " + str(w) + ", H =" + str(h) + "\n Confidence: " + str(confidence) + "\n")
-            elif (type_of_sign == "stop"):
-                print("Stop sign ahead! \n" + "X = " + str(x) + ", Y = " + str(y) + ", W = " + str(w) + ", H =" + str(h) + "\n Confidence: " + str(confidence) + "\n")
+            # Print object detected info
+            if (object_detected == "t_intersect"):
+                print("Intersection detected! \n" + "(x=" + str(x) + ",y=" + str(y) + ",w=" + str(w) + ",h=" + str(h) + ")\t Confidence: " + str(confidence) + "\n")
+            elif (object_detected == "stop"):
+                print("Stop sign detected! \n" + "(x=" + str(x) + ",y=" + str(y) + ",w=" + str(w) + ",h=" + str(h) + ")\t Confidence: " + str(confidence) + "\n")
+            elif (object_detected == "robot"):
+                print("Robot detected! \n" + "(x=" + str(x) + ",y=" + str(y) + ",w=" + str(w) + ",h=" + str(h) + ")\t Confidence: " + str(confidence) + "\n")
             
-            # If the sign is a stop sign, the confidence is high enough and 
-            # the stop sign is at the right side of the screen and is big on the screen then stop the car
-            if (confidence > 0.5):
-                if (type_of_sign == "stop"):
-                    # Sign is at right of the screen
-                    if (x > 300):
-                        # Sign is bigger than 100 pixels
-                        if (w > 100):
-                            print("STOP!!!!!! \n")
-                            stop_sign = True
-            
-            
+            # Robot is near stop or t-intersection sign
+            if (object_detected == "stop" or object_detected == "t_intersect") and confidence > 0.5 and x > 300 and w > 100:
+                if (object_detected == "stop"):
+                    print("STOP!!!!!!")
+                    stop_sign = True
+                else:
+                    print("INTERSECTION!!!!!!")
+                
+                # Detected a robot in the intersection
+                if any(pred["class"] == "robot" and pred["confidence"] > 0.5 and pred["width"] > 60 for pred in predictions):
+                    robot_detected = True
+                    print("ROBOT DETECTED!!!!!! \n")
+                else:
+                    print("NO ROBOT DETECTED!!!!!! \n")
+                            
     # Render Simulation
     env.render()
 
